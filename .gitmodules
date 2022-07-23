@@ -1,0 +1,9 @@
+[submodule "Submodules/GLFW"]
+	path = Submodules/GLFW
+	url = https://github.com/glfw/glfw.git
+[submodule "Submodules/GLAD"]
+	path = Submodules/GLAD
+	url = https://github.com/Dav1dde/glad.git
+[submodule "Submodules/Tileson"]
+	path = Submodules/Tileson
+	url = https://github.com/SSBMTonberry/tileson.git
