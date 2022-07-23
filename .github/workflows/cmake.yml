@@ -24,7 +24,9 @@ jobs:
 
     - name: Setup Dependencies
       shell: sh
-      run: .\Scripts\SetupDependenciesAction.sh
+      run: |
+        chmod +x Scripts\SetupDependenciesAction.sh
+        sh Scripts\SetupDependenciesAction.sh
 
     - name: Build Debug x64 with Ninja
       uses: ashutoshvarma/action-cmake-build@master
@@ -48,8 +50,8 @@ jobs:
         version: 1.10.0
 
     - name: Setup Dependencies
-      shell: cmd
-      run: .\Scripts\SetupDependenciesAction.bat
+      shell: bash
+      run: ./Scripts/SetupDependenciesAction.bat
 
     - name: Build Debug x64 with Ninja
       uses: ashutoshvarma/action-cmake-build@master
