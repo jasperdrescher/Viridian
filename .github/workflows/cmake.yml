@@ -1,0 +1,66 @@
+name: CMake
+
+on:
+  push:
+    branches: [ "githubactions" ]
+  pull_request:
+    branches: [ "githubactions" ]
+
+env:
+  # Customize the CMake build type here (Release, Debug, RelWithDebInfo, etc.)
+  BUILD_TYPE: Debug
+
+jobs:
+  build-linux:
+    # The CMake configure and build commands are platform agnostic and should work equally well on Windows or Mac.
+    # You can convert this to a matrix build if you need cross-platform coverage.
+    # See: https://docs.github.com/en/free-pro-team@latest/actions/learn-github-actions/managing-complex-workflows#using-a-build-matrix
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Setup Ninja
+      uses: ashutoshvarma/setup-ninja@master
+      with:
+        # ninja version to download. Default: 1.10.0
+        version: 1.10.0
+
+    - name: Setup Dependencies
+      shell: sh
+      run: .\Scripts\SetupDependenciesAction.sh
+
+    - name: Build Debug x64 with Ninja
+      uses: ashutoshvarma/action-cmake-build@master
+      with:
+        build-dir: ${{ runner.workspace }}/build
+        cc: "gcc"
+        cxx: "g++"
+        configure-options: -G Ninja
+        build-type: Debug
+      
+  build-windows:
+    runs-on: windows-latest
+
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Setup Ninja
+      uses: ashutoshvarma/setup-ninja@master
+      with:
+        # ninja version to download. Default: 1.10.0
+        version: 1.10.0
+
+    - name: Setup Dependencies
+      shell: cmd
+      run: .\Scripts\SetupDependenciesAction.bat
+
+    - name: Build Debug x64 with Ninja
+      uses: ashutoshvarma/action-cmake-build@master
+      with:
+        build-dir: ${{ runner.workspace }}/build
+        cc: "cl"
+        cxx: "cl"
+        configure-options: -G Ninja
+        build-type: Debug
+      
