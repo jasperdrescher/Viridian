@@ -16,7 +16,7 @@ int main(int /*argc*/, char** /*argv*/)
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_COMPAT_PROFILE);
 	glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, GL_TRUE);
 
-	GLFWwindow* window = glfwCreateWindow(640, 480, "Viridian", nullptr, nullptr);
+	GLFWwindow* window = glfwCreateWindow(640, 480, "Viridian Debug x64", nullptr, nullptr);
 	if (!window)
 	{
 		glfwTerminate();

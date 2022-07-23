@@ -1,3 +1,4 @@
+cd ..
 git submodule update --init --recursive
 mkdir Dependencies
 cd Dependencies
@@ -10,4 +11,3 @@ mkdir GLAD
 cd ..
 cmake -S Submodules/glad -B Dependencies/GLAD
 cmake --build Dependencies/GLAD --target glad --config Debug
-pause
