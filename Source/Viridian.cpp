@@ -76,6 +76,9 @@ void PrintDebugInfo()
 {
 	printf("OpenGL %s\n", glGetString(GL_VERSION));
 	printf("GLSL %s\n", glGetString(GL_SHADING_LANGUAGE_VERSION));
+	int major, minor, revision;
+	glfwGetVersion(&major, &minor, &revision);
+	printf("GLFW %d.%d.%d\n", major, minor, revision);
 }
 
 static void GLAPIENTRY ErrorCallback(GLenum aSource, GLenum aType, GLuint anID, GLenum aSeverity, GLsizei /*aLength*/, const GLchar* aMessage, const void* /*aUserParam*/)
