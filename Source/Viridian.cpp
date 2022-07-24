@@ -72,6 +72,94 @@ void ParseTilemap()
 	}
 }
 
+void PrintDebugInfo()
+{
+	printf("OpenGL %s\n", glGetString(GL_VERSION));
+	printf("GLSL %s\n", glGetString(GL_SHADING_LANGUAGE_VERSION));
+}
+
+static void GLAPIENTRY ErrorCallback(GLenum aSource, GLenum aType, GLuint anID, GLenum aSeverity, GLsizei /*aLength*/, const GLchar* aMessage, const void* /*aUserParam*/)
+{
+	std::string source;
+	std::string type;
+	std::string severity;
+
+	switch (aSource)
+	{
+		case GL_DEBUG_SOURCE_API:
+			source = "API";
+			break;
+		case GL_DEBUG_SOURCE_WINDOW_SYSTEM:
+			source = "WINDOW SYSTEM";
+			break;
+		case GL_DEBUG_SOURCE_SHADER_COMPILER:
+			source = "SHADER COMPILER";
+			break;
+		case GL_DEBUG_SOURCE_THIRD_PARTY:
+			source = "THIRD PARTY";
+			break;
+		case GL_DEBUG_SOURCE_APPLICATION:
+			source = "APPLICATION";
+			break;
+		case GL_DEBUG_SOURCE_OTHER:
+			source = "OTHER";
+			break;
+		default:
+			source = "UNKNOWN";
+			break;
+	}
+
+	switch (aType)
+	{
+		case GL_DEBUG_TYPE_ERROR:
+			type = "ERROR";
+			break;
+		case GL_DEBUG_TYPE_DEPRECATED_BEHAVIOR:
+			type = "DEPRECATED BEHAVIOR";
+			break;
+		case GL_DEBUG_TYPE_UNDEFINED_BEHAVIOR:
+			type = "UDEFINED BEHAVIOR";
+			break;
+		case GL_DEBUG_TYPE_PORTABILITY:
+			type = "PORTABILITY";
+			break;
+		case GL_DEBUG_TYPE_PERFORMANCE:
+			type = "PERFORMANCE";
+			break;
+		case GL_DEBUG_TYPE_OTHER:
+			type = "OTHER";
+			break;
+		case GL_DEBUG_TYPE_MARKER:
+			type = "MARKER";
+			break;
+		default:
+			type = "UNKNOWN";
+			break;
+	}
+
+	switch (aSeverity)
+	{
+		case GL_DEBUG_SEVERITY_HIGH:
+			severity = "HIGH";
+			break;
+		case GL_DEBUG_SEVERITY_MEDIUM:
+			severity = "MEDIUM";
+			break;
+		case GL_DEBUG_SEVERITY_LOW:
+			severity = "LOW";
+			break;
+		case GL_DEBUG_SEVERITY_NOTIFICATION:
+			severity = "NOTIFICATION";
+			break;
+		default:
+			severity = "UNKNOWN";
+			break;
+	}
+
+	printf("Message from OpenGL: Severity: %s Type: %s Source: %s Id: 0x%x\n", severity.c_str(), type.c_str(), source.c_str(), anID);
+	printf("%s\n", aMessage);
+}
+
 int main(int /*argc*/, char** /*argv*/)
 {
 	if (!glfwInit())
@@ -86,11 +174,13 @@ int main(int /*argc*/, char** /*argv*/)
 	glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_COMPAT_PROFILE);
 	glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, GL_TRUE);
+	glfwWindowHint(GLFW_SAMPLES, 4);
 
 	GLFWwindow* window = glfwCreateWindow(640, 480, "Viridian Debug x64", nullptr, nullptr);
 	if (!window)
 	{
 		glfwTerminate();
+		printf("Failed to create a window\n");
 		return -1;
 	}
 
@@ -99,8 +189,16 @@ int main(int /*argc*/, char** /*argv*/)
 	if (!gladLoadGLLoader(reinterpret_cast<GLADloadproc>(glfwGetProcAddress)))
 	{
 		glfwTerminate();
+		printf("Failed to load GL\n");
 		return -1;
 	}
+
+	PrintDebugInfo();
+
+	glEnable(GL_DEBUG_OUTPUT);
+	glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
+	glDebugMessageControl(GL_DEBUG_SOURCE_API, GL_DONT_CARE, GL_DONT_CARE, 0, nullptr, GL_FALSE);
+	glDebugMessageCallback(ErrorCallback, nullptr);
 
 	ParseTilemap();
 
