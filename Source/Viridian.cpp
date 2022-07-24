@@ -200,26 +200,38 @@ void ErrorCallback(int anError, const char* aDescription)
 	printf("%i %s", anError, aDescription);
 }
 
-void CheckStatus(GLuint anObjectIdentifier, bool anIsShader)
+void CheckShaderLinkStatus(GLuint aProgramIdentifier)
 {
-	GLint status = GL_FALSE;
-	constexpr GLint log[1 << 11] = { 0 };
-	(anIsShader ? glGetShaderiv : glGetProgramiv)(anObjectIdentifier, anIsShader ? GL_COMPILE_STATUS : GL_LINK_STATUS, &status);
-	if (status == GL_TRUE)
-		return;
+	GLint isLinked = GL_FALSE;
+	glGetProgramiv(aProgramIdentifier, GL_LINK_STATUS, &isLinked);
+	if (isLinked == GL_FALSE)
+	{
+		GLchar infoLog[512];
+		glGetProgramInfoLog(aProgramIdentifier, 512, nullptr, infoLog);
+		printf("%s\n", infoLog);
+	}
+}
 
-	(anIsShader ? glGetShaderInfoLog : glGetProgramInfoLog)(anObjectIdentifier, sizeof(log), nullptr, (GLchar*)log);
-	printf("%s\n", (GLchar*)log);
+void CheckShaderCompileStatus(GLuint aShaderIdentifier)
+{
+	GLint isCompiled = GL_FALSE;
+	glGetShaderiv(aShaderIdentifier, GL_COMPILE_STATUS, &isCompiled);
+	if (isCompiled == GL_FALSE)
+	{
+		GLchar shaderInfoLog[512];
+		glGetShaderInfoLog(aShaderIdentifier, 512, nullptr, shaderInfoLog);
+		printf("%s\n", shaderInfoLog);
+	}
 }
 
 void AttachShader(GLuint aProgramIdentifier, GLenum aType, const char* aSource)
 {
-	const GLuint shader = glCreateShader(aType);
-	glShaderSource(shader, 1, &aSource, nullptr);
-	glCompileShader(shader);
-	CheckStatus(shader, true);
-	glAttachShader(aProgramIdentifier, shader);
-	glDeleteShader(shader);
+	const GLuint shaderIdentifier = glCreateShader(aType);
+	glShaderSource(shaderIdentifier, 1, &aSource, nullptr);
+	glCompileShader(shaderIdentifier);
+	CheckShaderCompileStatus(shaderIdentifier);
+	glAttachShader(aProgramIdentifier, shaderIdentifier);
+	glDeleteShader(shaderIdentifier);
 }
 
 int main(int /*argc*/, char** /*argv*/)
@@ -272,7 +284,7 @@ int main(int /*argc*/, char** /*argv*/)
 	AttachShader(programIdentifier, GL_VERTEX_SHADER, vertexShader.c_str());
 	AttachShader(programIdentifier, GL_FRAGMENT_SHADER, fragmentShader.c_str());
 	glLinkProgram(programIdentifier);
-	CheckStatus(programIdentifier, false);
+	CheckShaderLinkStatus(programIdentifier);
 
 	constexpr float vertices[] =
 	{
