@@ -7,6 +7,71 @@
 #include <string>
 #include <sstream>
 
+void ParseTilemap()
+{
+	const char* settingsSource = "Data/Settings.txt";
+	std::ifstream settingsFilestream(settingsSource, std::ifstream::in);
+	if (!settingsFilestream.is_open())
+	{
+		printf("Failed to open %s\n", settingsSource);
+		return;
+	}
+
+	std::stringstream settingsSourceStringStream;
+	settingsSourceStringStream << settingsFilestream.rdbuf();
+
+	settingsFilestream.close();
+
+	const std::string source = settingsSourceStringStream.str();
+	if (!std::filesystem::exists(source))
+	{
+		printf("Failed to open %s\n", source.c_str());
+		return;
+	}
+
+	std::ifstream filestream(source, std::ifstream::in);
+	if (!filestream.is_open())
+	{
+		printf("Failed to open %s\n", source.c_str());
+		return;
+	}
+
+	std::stringstream sourceStringStream;
+	sourceStringStream << filestream.rdbuf();
+
+	filestream.close();
+
+	const std::string dataString = sourceStringStream.str();
+	const unsigned int bufferSize = static_cast<unsigned int>(dataString.length()) + 1;
+	char* buffer = new char[bufferSize];
+	strcpy_s(buffer, bufferSize, dataString.c_str());
+
+	tson::Tileson tileson;
+	std::unique_ptr<tson::Map> map = tileson.parse(buffer, bufferSize);
+
+	if (map->getStatus() != tson::ParseStatus::OK)
+	{
+		printf("Failed to parse %s\n", source.c_str());
+		return;
+	}
+
+	for (tson::Layer& layer : map->getLayers())
+	{
+		if (layer.getType() == tson::LayerType::TileLayer)
+		{
+			for (auto& [pos, tileObject] : layer.getTileObjects())
+			{
+				tson::Tileset* localTileset = tileObject.getTile()->getTileset();
+				tson::Rect drawingRect = tileObject.getDrawingRect();
+				tson::Vector2f position = tileObject.getPosition();
+				printf("Tileset: %s\n", localTileset->getImagePath().generic_string().c_str());
+				printf("Rect: %i %i %i %i\n", drawingRect.x, drawingRect.y, drawingRect.width, drawingRect.height);
+				printf("Position: %0.1f %0.1f\n", position.x, position.y);
+			}
+		}
+	}
+}
+
 int main(int /*argc*/, char** /*argv*/)
 {
 	if (!glfwInit())
@@ -37,27 +102,7 @@ int main(int /*argc*/, char** /*argv*/)
 		return -1;
 	}
 
-	const char* source = "content/test-maps/demo-tileset.json";
-	if (std::filesystem::exists(source))
-	{
-		std::ifstream fileStream(source, std::ifstream::in);
-		assert(fileStream.is_open());
-		if (fileStream.is_open())
-		{
-			std::stringstream sourceStringStream;
-			sourceStringStream << fileStream.rdbuf();
-
-			fileStream.close();
-
-			const std::string dataString = sourceStringStream.str();
-			const unsigned int bufferSize = static_cast<unsigned int>(dataString.length()) + 1;
-			char* buffer = new char[bufferSize];
-			strcpy_s(buffer, bufferSize, dataString.c_str());
-
-			tson::Tileson t;
-			std::unique_ptr<tson::Map> map = t.parse(buffer, bufferSize);
-		}
-	}
+	ParseTilemap();
 
 	while (!glfwWindowShouldClose(window))
 	{
