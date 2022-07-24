@@ -17,6 +17,7 @@ set(DEPENDENCIES_DIR "${CMAKE_CURRENT_SOURCE_DIR}/Dependencies")
 add_executable(Game "Source/Viridian.cpp")
 
 include_directories(Game PRIVATE "${SUBMODULES_DIR}/Tileson")
+include_directories(Game PRIVATE "${SUBMODULES_DIR}/STB")
 
 add_library(GLFW STATIC IMPORTED)
 set_target_properties(GLFW PROPERTIES
