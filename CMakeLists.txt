@@ -14,18 +14,20 @@ set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/Libraries)
 set(SUBMODULES_DIR "${CMAKE_CURRENT_SOURCE_DIR}/Submodules")
 set(DEPENDENCIES_DIR "${CMAKE_CURRENT_SOURCE_DIR}/Dependencies")
 
-add_executable(Viridian Source/Viridian.cpp)
+add_executable(Game "Source/Viridian.cpp")
+
+include_directories(Game PRIVATE "${SUBMODULES_DIR}/Tileson")
 
 add_library(GLFW STATIC IMPORTED)
 set_target_properties(GLFW PROPERTIES
   IMPORTED_LOCATION "${DEPENDENCIES_DIR}/GLFW/src/Debug/glfw3.lib"
   INTERFACE_INCLUDE_DIRECTORIES "${SUBMODULES_DIR}/GLFW/include"
 )
-target_link_libraries(Viridian GLFW)
+target_link_libraries(Game GLFW)
 
 add_library(GLAD STATIC IMPORTED)
 set_target_properties(GLAD PROPERTIES
   IMPORTED_LOCATION "${DEPENDENCIES_DIR}/GLAD/Debug/glad.lib"
   INTERFACE_INCLUDE_DIRECTORIES "${DEPENDENCIES_DIR}/GLAD/include"
 )
-target_link_libraries(Viridian GLAD)
+target_link_libraries(Game GLAD)
