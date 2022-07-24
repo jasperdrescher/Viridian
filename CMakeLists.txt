@@ -31,3 +31,10 @@ set_target_properties(GLAD PROPERTIES
   INTERFACE_INCLUDE_DIRECTORIES "${DEPENDENCIES_DIR}/GLAD/include"
 )
 target_link_libraries(Game GLAD)
+
+add_custom_command(
+  TARGET Game
+  POST_BUILD COMMAND ${CMAKE_COMMAND}
+  -E copy_directory
+  "${CMAKE_SOURCE_DIR}/Data"
+  "$<TARGET_FILE_DIR:Game>/Data")
