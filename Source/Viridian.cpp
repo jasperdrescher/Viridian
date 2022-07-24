@@ -1,5 +1,11 @@
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
+#include <tileson.hpp>
+
+#include <filesystem>
+#include <fstream>
+#include <string>
+#include <sstream>
 
 int main(int /*argc*/, char** /*argv*/)
 {
@@ -29,6 +35,28 @@ int main(int /*argc*/, char** /*argv*/)
 	{
 		glfwTerminate();
 		return -1;
+	}
+
+	const char* source = "content/test-maps/demo-tileset.json";
+	if (std::filesystem::exists(source))
+	{
+		std::ifstream fileStream(source, std::ifstream::in);
+		assert(fileStream.is_open());
+		if (fileStream.is_open())
+		{
+			std::stringstream sourceStringStream;
+			sourceStringStream << fileStream.rdbuf();
+
+			fileStream.close();
+
+			const std::string dataString = sourceStringStream.str();
+			const unsigned int bufferSize = static_cast<unsigned int>(dataString.length()) + 1;
+			char* buffer = new char[bufferSize];
+			strcpy_s(buffer, bufferSize, dataString.c_str());
+
+			tson::Tileson t;
+			std::unique_ptr<tson::Map> map = t.parse(buffer, bufferSize);
+		}
 	}
 
 	while (!glfwWindowShouldClose(window))
