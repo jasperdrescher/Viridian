@@ -84,10 +84,11 @@ int CreateTexture(const std::string& aFilepath)
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-	int width, height;
 
 	stbi_set_flip_vertically_on_load(1);
 
+	int width = 0;
+	int height = 0;
 	unsigned char* data = stbi_load(aFilepath.c_str(), &width, &height, nullptr, 3);
 	if (!data)
 	{
@@ -300,17 +301,19 @@ int main(int /*argc*/, char** /*argv*/)
 		2, 3, 0
 	};
 
-	unsigned int VBO, VAO, EBO;
-	glGenVertexArrays(1, &VAO);
-	glGenBuffers(1, &VBO);
-	glGenBuffers(1, &EBO);
+	unsigned int vertexBufferObject = 0;
+	unsigned int vertexArrayObject = 0;
+	unsigned int elementBufferObject = 0;
+	glGenVertexArrays(1, &vertexBufferObject);
+	glGenBuffers(1, &vertexArrayObject);
+	glGenBuffers(1, &elementBufferObject);
 
-	glBindVertexArray(VAO);
+	glBindVertexArray(vertexBufferObject);
 
-	glBindBuffer(GL_ARRAY_BUFFER, VBO);
+	glBindBuffer(GL_ARRAY_BUFFER, vertexArrayObject);
 	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
 
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, elementBufferObject);
 	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
 
 	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), static_cast<void*>(nullptr));
@@ -343,7 +346,7 @@ int main(int /*argc*/, char** /*argv*/)
 			glBindTexture(GL_TEXTURE_2D, textureIdentifier);
 		}
 
-		glBindVertexArray(VAO);
+		glBindVertexArray(vertexArrayObject);
 		glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr);
 		glBindVertexArray(0);
 
