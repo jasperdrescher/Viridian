@@ -32,7 +32,25 @@ std::string ReadFile(const char* aFilepath)
 	return sourceStringStream.str();
 }
 
-void ParseTilemap(std::string& aTilesetFilepath)
+struct Tile
+{
+	tson::Rect myDrawingRectangle;
+	tson::Vector2f myPosition;
+};
+
+struct Image
+{
+	std::string myFilepath;
+	tson::Vector2i mySize;
+};
+
+struct Tilemap
+{
+	std::vector<Tile> myTiles;
+	Image myImage;
+};
+
+Tilemap ParseTilemap()
 {
 	const char* settingsSource = "Data/Settings.txt";
 	const std::string tilemapFilepath = ReadFile(settingsSource);
@@ -44,10 +62,11 @@ void ParseTilemap(std::string& aTilesetFilepath)
 	tson::Tileson tileson;
 	const std::unique_ptr<tson::Map> map = tileson.parse(buffer, bufferSize);
 
+	Tilemap tilemap;
 	if (map->getStatus() != tson::ParseStatus::OK)
 	{
 		printf("Failed to parse %s\n", tilemapFilepath.c_str());
-		return;
+		return tilemap;
 	}
 
 	for (tson::Layer& layer : map->getLayers())
@@ -59,19 +78,33 @@ void ParseTilemap(std::string& aTilesetFilepath)
 				const tson::Tileset* localTileset = tileObject.getTile()->getTileset();
 				const tson::Rect drawingRect = tileObject.getDrawingRect();
 				const tson::Vector2f position = tileObject.getPosition();
+				const tson::Vector2i imageSize = localTileset->getImageSize();
+				std::string imageFilepath = localTileset->getImagePath().generic_string();
 
-				if (!localTileset->getImagePath().generic_string().empty())
+				std::string finalImageFilepath;
+				if (!imageFilepath.empty())
 				{
-					std::string imagePath = localTileset->getImagePath().generic_string();
-					imagePath.erase(0, imagePath.find_last_of('/') + 1);
-					aTilesetFilepath = "Data/" + imagePath;
-					printf("Tileset: %s\n", aTilesetFilepath.c_str());
+					imageFilepath.erase(0, imageFilepath.find_last_of('/') + 1);
+					finalImageFilepath = "Data/" + imageFilepath;
+					printf("Tileset: %s\n", finalImageFilepath.c_str());
 				}
 				printf("Rect: %i %i %i %i\n", drawingRect.x, drawingRect.y, drawingRect.width, drawingRect.height);
 				printf("Position: %0.1f %0.1f\n", position.x, position.y);
+
+				Tile tile;
+				tile.myDrawingRectangle = drawingRect;
+				tile.myPosition = position;
+				tilemap.myTiles.emplace_back(tile);
+
+				if (tilemap.myImage.myFilepath.empty())
+				{
+					tilemap.myImage.myFilepath = finalImageFilepath;
+					tilemap.myImage.mySize = imageSize;
+				}
 			}
 		}
 	}
+	return tilemap;
 }
 
 int CreateTexture(const std::string& aFilepath)
@@ -325,12 +358,11 @@ int main(int /*argc*/, char** /*argv*/)
 	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), reinterpret_cast<void*>(6 * sizeof(float)));
 	glEnableVertexAttribArray(2);
 
-	std::string tilesetFilepath;
-	ParseTilemap(tilesetFilepath);
+	const Tilemap tilemap = ParseTilemap();
 
 	int textureIdentifier = -1;
-	if (!tilesetFilepath.empty())
-		textureIdentifier = CreateTexture(tilesetFilepath);
+	if (!tilemap.myImage.myFilepath.empty())
+		textureIdentifier = CreateTexture(tilemap.myImage.myFilepath);
 
 	while (!glfwWindowShouldClose(window))
 	{
