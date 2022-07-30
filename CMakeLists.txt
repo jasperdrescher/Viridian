@@ -14,10 +14,11 @@ set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/Libraries)
 set(SUBMODULES_DIR "${CMAKE_CURRENT_SOURCE_DIR}/Submodules")
 set(DEPENDENCIES_DIR "${CMAKE_CURRENT_SOURCE_DIR}/Dependencies")
 
-add_executable(Game "Source/Viridian.cpp")
+add_executable(Game "Source/Viridian.cpp" "Source/FileUtility.hpp" "Source/GLDebugUtility.hpp" "Source/SpriteBatcher.cpp" "Source/Texture.cpp" "Source/Shader.cpp" "Source/Texture.hpp" "Source/Shader.hpp")
 
 include_directories(Game PRIVATE "${SUBMODULES_DIR}/Tileson")
 include_directories(Game PRIVATE "${SUBMODULES_DIR}/STB")
+include_directories(Game PRIVATE "${SUBMODULES_DIR}/GLM")
 
 add_library(GLFW STATIC IMPORTED)
 set_target_properties(GLFW PROPERTIES
