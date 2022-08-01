@@ -5,21 +5,19 @@
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 
+#include <chrono>
 #define STB_IMAGE_IMPLEMENTATION
 #include <stb_image.h>
-
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 #include <tmxlite/Map.hpp>
 
-#include <chrono>
-
 Game::Game(GLFWwindow* aWindow)
 	: myProjectionMatrix(0.0f)
-  , myViewMatrix(0.0f)
-  , myModelMatrix(0.0f)
-  , myGLFWWindow(aWindow)
-  , myShaderProgramIdentifier(0)
+	, myViewMatrix(0.0f)
+	, myModelMatrix(0.0f)
+	, myGLFWWindow(aWindow)
+	, myShaderProgramIdentifier(0)
 {}
 
 Game::~Game()
@@ -27,7 +25,7 @@ Game::~Game()
 	if (myShaderProgramIdentifier)
 		glDeleteProgram(myShaderProgramIdentifier);
 
-	for (const auto& textureIdentifier : myTileTextureIdentifiers)
+	for (const unsigned int& textureIdentifier : myTileTextureIdentifiers)
 		glDeleteTextures(1, &textureIdentifier);
 }
 
@@ -37,11 +35,11 @@ void Game::Run()
 
 	LoadMap();
 
-	auto previousTime = std::chrono::high_resolution_clock::now();
+	std::chrono::time_point<std::chrono::steady_clock> previousTime = std::chrono::high_resolution_clock::now();
 	while (!glfwWindowShouldClose(myGLFWWindow))
 	{
-		auto currentTime = std::chrono::high_resolution_clock::now();
-		auto elapsedTime = currentTime - previousTime;
+		std::chrono::time_point<std::chrono::steady_clock> currentTime = std::chrono::high_resolution_clock::now();
+		std::chrono::duration<long long, std::ratio<1, 1000000000>> elapsedTime = currentTime - previousTime;
 		const float deltaTime = std::chrono::duration<float>(elapsedTime).count();
 		previousTime = currentTime;
 
@@ -56,10 +54,8 @@ void Game::Draw() const
 	glClear(GL_COLOR_BUFFER_BIT);
 	glUseProgram(myShaderProgramIdentifier);
 
-	for (const auto& layer : myMapLayers)
-	{
+	for (const std::unique_ptr<MapLayer>& layer : myMapLayers)
 		layer->Draw();
-	}
 
 	glfwSwapBuffers(myGLFWWindow);
 	glfwPollEvents();
@@ -74,17 +70,13 @@ void Game::LoadMap()
 	tmx::Map map;
 	map.load(filePath);
 
-	// Create shared resources, shader and tileset textures
 	InitializeGL(map);
 
-	// Create a drawable object for each tile layer
-	const auto& layers = map.getLayers();
-	for (auto i = 0u; i < layers.size(); ++i)
+	const std::vector<tmx::Layer::Ptr>& layers = map.getLayers();
+	for (unsigned int i = 0; i < layers.size(); ++i)
 	{
 		if (layers[i]->getType() == tmx::Layer::Type::Tile)
-		{
 			myMapLayers.emplace_back(std::make_unique<MapLayer>(map, i, myTileTextureIdentifiers));
-		}
 	}
 }
 
@@ -106,13 +98,11 @@ void Game::InitializeGL(const tmx::Map& aMap)
 	glUniform1i(glGetUniformLocation(myShaderProgramIdentifier, "u_tileMap"), 0);
 	glUniform1i(glGetUniformLocation(myShaderProgramIdentifier, "u_lookupMap"), 1);
 
-	const auto& tilesets = aMap.getTilesets();
-	for (const auto& ts : tilesets)
-	{
-		LoadTexture(ts.getImagePath());
-	}
+	const std::vector<tmx::Tileset>& tilesets = aMap.getTilesets();
+	for (const tmx::Tileset& tileset : tilesets)
+		LoadTexture(tileset.getImagePath());
 
-	glClearColor(0.6f, 0.8f, 0.92f, 1.f);
+	glClearColor(0.6f, 0.8f, 0.92f, 1.0f);
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	glBlendEquation(GL_FUNC_ADD);
@@ -140,7 +130,7 @@ void Game::LoadShader()
 void Game::LoadTexture(const std::string& aFilepath)
 {
 	myTileTextureIdentifiers.emplace_back(0);
-	unsigned& textureIdentifier = myTileTextureIdentifiers.back();
+	unsigned int& textureIdentifier = myTileTextureIdentifiers.back();
 
 	int width = 0;
 	int height = 0;

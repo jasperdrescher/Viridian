@@ -3,21 +3,21 @@
 #include <glad/glad.h>
 #include <tmxlite/TileLayer.hpp>
 
-MapLayer::MapLayer(const tmx::Map& map, std::size_t layerIdx, const std::vector<unsigned>& textures)
-	: myTilesetTextureIdentifiers(textures)
+MapLayer::MapLayer(const tmx::Map& aMap, std::size_t aLayerIndex, const std::vector<unsigned int>& aTextureIdentifier)
+	: myTilesetTextureIdentifiers(aTextureIdentifier)
 {
-	CreateSubsets(map, layerIdx);
+	CreateSubsets(aMap, aLayerIndex);
 }
 
 MapLayer::~MapLayer()
 {
-	for (auto& ss : mySubsets)
+	for (Subset& subset : mySubsets)
 	{
-		if (ss.myVertexBufferObject)
-			glDeleteBuffers(1, &ss.myVertexBufferObject);
+		if (subset.myVertexBufferObject)
+			glDeleteBuffers(1, &subset.myVertexBufferObject);
 
-		if (ss.myLookup)
-			glDeleteTextures(1, &ss.myLookup);
+		if (subset.myLookup)
+			glDeleteTextures(1, &subset.myLookup);
 	}
 }
 
@@ -28,15 +28,15 @@ void MapLayer::Draw() const
 	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), nullptr);
 	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), reinterpret_cast<void*>(3 * sizeof(float)));
 
-	for (const auto& ss : mySubsets)
+	for (const Subset& subset : mySubsets)
 	{
 		glActiveTexture(GL_TEXTURE0);
-		glBindTexture(GL_TEXTURE_2D, ss.myTextureIdentifier);
+		glBindTexture(GL_TEXTURE_2D, subset.myTextureIdentifier);
 
 		glActiveTexture(GL_TEXTURE1);
-		glBindTexture(GL_TEXTURE_2D, ss.myLookup);
+		glBindTexture(GL_TEXTURE_2D, subset.myLookup);
 
-		glBindBuffer(GL_ARRAY_BUFFER, ss.myVertexBufferObject);
+		glBindBuffer(GL_ARRAY_BUFFER, subset.myVertexBufferObject);
 		glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
 	}
 
@@ -52,56 +52,56 @@ MapLayer::Subset::Subset()
 
 void MapLayer::CreateSubsets(const tmx::Map& aMap, std::size_t aLayerIndex)
 {
-	const auto& layers = aMap.getLayers();
+	const std::vector<tmx::Layer::Ptr>& layers = aMap.getLayers();
 	if (aLayerIndex >= layers.size() || (layers[aLayerIndex]->getType() != tmx::Layer::Type::Tile))
 	{
 		printf("Invalid layer index or layer type, layer will be empty\n");
 		return;
 	}
 
-	const auto layer = dynamic_cast<const tmx::TileLayer*>(layers[aLayerIndex].get());
+	const tmx::TileLayer* const layer = dynamic_cast<const tmx::TileLayer*>(layers[aLayerIndex].get());
 
-	const auto bounds = aMap.getBounds();
+	const tmx::FloatRect bounds = aMap.getBounds();
 	const float verts[] =
 	{
-		bounds.left, bounds.top, 0.f, 0.f, 0.f,
-		bounds.left + bounds.width, bounds.top, 0.f, 1.f, 0.f,
-		bounds.left, bounds.top + bounds.height, 0.f, 0.f, 1.f,
-		bounds.left + bounds.width, bounds.top + bounds.height, 0.f, 1.f, 1.f
+		bounds.left, bounds.top, 0.0f, 0.0f, 0.0f,
+		bounds.left + bounds.width, bounds.top, 0.0f, 1.0f, 0.0f,
+		bounds.left, bounds.top + bounds.height, 0.0f, 0.0f, 1.0f,
+		bounds.left + bounds.width, bounds.top + bounds.height, 0.0f, 1.0f, 1.0f
 	};
 
-	const auto& mapSize = aMap.getTileCount();
-	const auto& tilesets = aMap.getTilesets();
-	for (auto i = 0u; i < tilesets.size(); ++i)
+	const tmx::Vector2u& mapSize = aMap.getTileCount();
+	const std::vector<tmx::Tileset>& tilesets = aMap.getTilesets();
+	for (unsigned int i = 0; i < tilesets.size(); ++i)
 	{
-		//check each tile ID to see if it falls in the current tile set
-		const auto& ts = tilesets[i];
-		const auto& tileIDs = layer->getTiles();
+		const tmx::Tileset& tileset = tilesets[i];
+		const std::vector<tmx::TileLayer::Tile>& tileIDs = layer->getTiles();
 		std::vector<std::uint16_t> pixelData;
 		bool tsUsed = false;
 
-		for (auto y = 0u; y < mapSize.y; ++y)
+		for (unsigned int y = 0; y < mapSize.y; ++y)
 		{
-			for (auto x = 0u; x < mapSize.x; ++x)
+			for (unsigned int x = 0; x < mapSize.x; ++x)
 			{
-				const auto idx = y * mapSize.x + x;
-				if (idx < tileIDs.size() && tileIDs[idx].ID >= ts.getFirstGID()
-					&& tileIDs[idx].ID < (ts.getFirstGID() + ts.getTileCount()))
+				const unsigned index = y * mapSize.x + x;
+				if (index < tileIDs.size()
+					&& tileIDs[index].ID >= tileset.getFirstGID()
+					&& tileIDs[index].ID < (tileset.getFirstGID() + tileset.getTileCount()))
 				{
-					pixelData.push_back(static_cast<std::uint16_t>((tileIDs[idx].ID - ts.getFirstGID()) + 1)); //red channel - making sure to index relative to the tileset
-					pixelData.push_back(tileIDs[idx].flipFlags); //green channel - tile flips are performed on the shader
+					pixelData.push_back(static_cast<std::uint16_t>((tileIDs[index].ID - tileset.getFirstGID()) + 1)); // Red channel - making sure to index relative to the tileset
+					pixelData.push_back(tileIDs[index].flipFlags); // Green channel - tile flips are performed on the shader
 					tsUsed = true;
 				}
 				else
 				{
-					//pad with empty space
+					// Pad with empty space
 					pixelData.push_back(0);
 					pixelData.push_back(0);
 				}
 			}
 		}
 
-		//if we have some data for this tile set, create the resources
+		// If we have some data for this tile set, create the resources
 		if (tsUsed)
 		{
 			mySubsets.emplace_back();

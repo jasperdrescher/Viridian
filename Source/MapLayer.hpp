@@ -7,7 +7,7 @@
 class MapLayer final
 {
 public:
-	MapLayer(const tmx::Map&, std::size_t, const std::vector<unsigned>&);
+	MapLayer(const tmx::Map& aMap, std::size_t aLayerIndex, const std::vector<unsigned>& aTextureIdentifier);
 	~MapLayer();
 
 	MapLayer(const MapLayer&) = delete;
@@ -20,13 +20,13 @@ private:
 	{
 		Subset();
 
-		unsigned myVertexBufferObject;
-		unsigned myTextureIdentifier;
-		unsigned myLookup;
+		unsigned int myVertexBufferObject;
+		unsigned int myTextureIdentifier;
+		unsigned int myLookup;
 	};
 
 	void CreateSubsets(const tmx::Map& aMap, std::size_t aLayerIndex);
 
 	std::vector<Subset> mySubsets;
-	const std::vector<unsigned>& myTilesetTextureIdentifiers;
+	const std::vector<unsigned int>& myTilesetTextureIdentifiers;
 };

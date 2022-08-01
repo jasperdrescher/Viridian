@@ -1,6 +1,6 @@
 #pragma once
 
-class Shader
+class Shader final
 {
 public:
 	Shader();

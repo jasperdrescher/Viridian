@@ -19,19 +19,19 @@ public:
 	void Run();
 
 private:
-	void HandleEvents() {}
-	void Update(float aDeltaTime) {}
+	static void HandleEvents() {}
+	static void Update(float aDeltaTime) {}
 	void Draw() const;
 	void LoadMap();
-	void InitializeGL(const tmx::Map&);
+	void InitializeGL(const tmx::Map& aMap);
 	void LoadShader();
-	void LoadTexture(const std::string&);
+	void LoadTexture(const std::string& aFilepath);
 
 	std::vector<std::unique_ptr<MapLayer>> myMapLayers;
-	std::vector<unsigned> myTileTextureIdentifiers;
+	std::vector<unsigned int> myTileTextureIdentifiers;
 	glm::mat4 myProjectionMatrix;
 	glm::mat4 myViewMatrix;
 	glm::mat4 myModelMatrix;
 	GLFWwindow* myGLFWWindow;
-	unsigned myShaderProgramIdentifier;
+	unsigned int myShaderProgramIdentifier;
 };
