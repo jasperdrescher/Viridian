@@ -9,6 +9,7 @@
 #include <stb_image.h>
 
 #include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/type_ptr.hpp>
 #include <tmxlite/Map.hpp>
 
 #include <chrono>
@@ -66,7 +67,7 @@ void Game::Draw() const
 
 void Game::LoadMap()
 {
-	const std::string filePath = "Data/demo.tmx";
+	const std::string filePath = "Data/platform.tmx";
 	if (!FileUtility::Exists(filePath.c_str()))
 		return;
 
@@ -90,18 +91,15 @@ void Game::LoadMap()
 void Game::InitializeGL(const tmx::Map& aMap)
 {
 	myProjectionMatrix = glm::ortho(0.0f, 800.0f, 600.0f, 0.0f, -0.1f, 100.0f);
-	myViewMatrix = glm::lookAt(
-		glm::vec3(0.0f, 0.0f, 0.0f), // Camera is at this in World Space
-		glm::vec3(0.0f, 0.0f, -1.0f), // and looks at the origin
-		glm::vec3(0.0f, 1.0f, 0.0f) // Head is up (set to 0,-1,0 to look upside-down)
-	);
+	constexpr glm::vec3 cameraPosition = glm::vec3(200.0f, 2000.0f, 0.0f);
+	constexpr glm::vec3 cameraFront = glm::vec3(0.0f, 0.0f, -1.0f);
+	myViewMatrix = glm::lookAt(cameraPosition, cameraPosition + cameraFront, glm::vec3(0.0f, 1.0f, 0.0f));
 	myModelMatrix = glm::mat4(1.0f);
-	glm::translate(myViewMatrix, glm::vec3(0.0f, -1.0f, -3.0f));
 
 	LoadShader();
 	glUseProgram(myShaderProgramIdentifier);
 	glm::mat4x4 mvp = myProjectionMatrix * myViewMatrix * myModelMatrix;
-	glUniformMatrix4fv(glGetUniformLocation(myShaderProgramIdentifier, "u_MVP"), 1, GL_FALSE, &mvp[0][0]);
+	glUniformMatrix4fv(glGetUniformLocation(myShaderProgramIdentifier, "u_MVP"), 1, GL_FALSE, glm::value_ptr(mvp));
 
 	// We'll make sure the current tile texture is active in 0,
 	// and lookup texture is active in 1 in MapLayer::draw()
