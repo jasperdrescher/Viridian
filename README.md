@@ -21,6 +21,7 @@ Name | Description | License
 [GLM](https://github.com/g-truc/glm) | OpenGL math library | [MIT](https://github.com/g-truc/glm/blob/master/manual.md#section0)
 [STB](https://github.com/nothings/stb) | Collection of single-file libraries | [MIT](https://github.com/nothings/stb/blob/master/LICENSE)
 [TMXLite](https://github.com/fallahn/tmxlite) | Lightweight C++14 parser for Tiled tmx files | [ZLIB](https://github.com/fallahn/tmxlite/blob/master/LICENSE)
+[Tiled](https://www.mapeditor.org/) | A 2D level editor that helps you develop the content of your game | N/A
 
 
 ## Bugs, issues and suggestions
