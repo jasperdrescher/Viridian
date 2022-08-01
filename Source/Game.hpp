@@ -29,7 +29,9 @@ private:
 
 	std::vector<std::unique_ptr<MapLayer>> myMapLayers;
 	std::vector<unsigned> myTileTextureIdentifiers;
-	glm::mat4 m_projectionMatrix;
+	glm::mat4 myProjectionMatrix;
+	glm::mat4 myViewMatrix;
+	glm::mat4 myModelMatrix;
 	GLFWwindow* myGLFWWindow;
 	unsigned myShaderProgramIdentifier;
 };

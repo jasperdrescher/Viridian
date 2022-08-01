@@ -14,9 +14,11 @@
 #include <chrono>
 
 Game::Game(GLFWwindow* aWindow)
-	: m_projectionMatrix(0.0f)
-	, myGLFWWindow(aWindow)
-	, myShaderProgramIdentifier(0)
+	: myProjectionMatrix(0.0f)
+  , myViewMatrix(0.0f)
+  , myModelMatrix(0.0f)
+  , myGLFWWindow(aWindow)
+  , myShaderProgramIdentifier(0)
 {}
 
 Game::~Game()
@@ -87,11 +89,19 @@ void Game::LoadMap()
 
 void Game::InitializeGL(const tmx::Map& aMap)
 {
-	m_projectionMatrix = glm::ortho(0.f, 800.f, 600.f, 0.f, -0.1f, 100.f);
+	myProjectionMatrix = glm::ortho(0.0f, 800.0f, 600.0f, 0.0f, -0.1f, 100.0f);
+	myViewMatrix = glm::lookAt(
+		glm::vec3(0.0f, 0.0f, 0.0f), // Camera is at this in World Space
+		glm::vec3(0.0f, 0.0f, -1.0f), // and looks at the origin
+		glm::vec3(0.0f, 1.0f, 0.0f) // Head is up (set to 0,-1,0 to look upside-down)
+	);
+	myModelMatrix = glm::mat4(1.0f);
+	glm::translate(myViewMatrix, glm::vec3(0.0f, -1.0f, -3.0f));
 
 	LoadShader();
 	glUseProgram(myShaderProgramIdentifier);
-	glUniformMatrix4fv(glGetUniformLocation(myShaderProgramIdentifier, "u_projectionMatrix"), 1, GL_FALSE, &m_projectionMatrix[0][0]);
+	glm::mat4x4 mvp = myProjectionMatrix * myViewMatrix * myModelMatrix;
+	glUniformMatrix4fv(glGetUniformLocation(myShaderProgramIdentifier, "u_MVP"), 1, GL_FALSE, &mvp[0][0]);
 
 	// We'll make sure the current tile texture is active in 0,
 	// and lookup texture is active in 1 in MapLayer::draw()
