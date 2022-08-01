@@ -14,7 +14,9 @@ set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/Libraries)
 set(SUBMODULES_DIR "${CMAKE_CURRENT_SOURCE_DIR}/Submodules")
 set(DEPENDENCIES_DIR "${CMAKE_CURRENT_SOURCE_DIR}/Dependencies")
 
-add_executable(Game "Source/Viridian.cpp" "Source/FileUtility.hpp" "Source/GLDebugUtility.hpp" "Source/SpriteBatcher.cpp" "Source/Texture.cpp" "Source/Shader.cpp" "Source/Texture.hpp" "Source/Shader.hpp")
+add_executable(Game "Source/Viridian.cpp" "Source/FileUtility.hpp" "Source/GLDebugUtility.hpp" "Source/Shader.cpp" "Source/Shader.hpp" "Source/MapLayer.hpp" "Source/MapLayer.cpp" "Source/Game.cpp" "Source/Game.hpp")
+
+set_property(TARGET Game PROPERTY VS_DEBUGGER_WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/Binaries")
 
 include_directories(Game PRIVATE "${SUBMODULES_DIR}/Tileson")
 include_directories(Game PRIVATE "${SUBMODULES_DIR}/STB")
@@ -33,6 +35,15 @@ set_target_properties(GLAD PROPERTIES
   INTERFACE_INCLUDE_DIRECTORIES "${DEPENDENCIES_DIR}/GLAD/include"
 )
 target_link_libraries(Game GLAD)
+
+add_library(TMXLite STATIC IMPORTED)
+set_target_properties(TMXLite PROPERTIES
+  IMPORTED_LOCATION "${DEPENDENCIES_DIR}/TMXLite/Debug/tmxlite-s-d.lib"
+  INTERFACE_INCLUDE_DIRECTORIES "${SUBMODULES_DIR}/TMXLite/tmxlite/include"
+)
+target_link_libraries(Game TMXLite)
+
+set_property(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY VS_STARTUP_PROJECT Game)
 
 add_custom_command(
   TARGET Game

@@ -4,12 +4,12 @@
 [submodule "Submodules/GLAD"]
 	path = Submodules/GLAD
 	url = https://github.com/Dav1dde/glad.git
-[submodule "Submodules/Tileson"]
-	path = Submodules/Tileson
-	url = https://github.com/SSBMTonberry/tileson.git
 [submodule "Submodules/STB"]
 	path = Submodules/STB
 	url = https://github.com/nothings/stb.git
 [submodule "Submodules/GLM"]
 	path = Submodules/GLM
 	url = https://github.com/g-truc/glm.git
+[submodule "Submodules/TMXLite"]
+	path = Submodules/TMXLite
+	url = https://github.com/fallahn/tmxlite.git

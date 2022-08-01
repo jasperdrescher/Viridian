@@ -10,3 +10,8 @@ mkdir GLAD
 cd ..
 cmake -S Submodules/glad -B Dependencies/GLAD
 cmake --build Dependencies/GLAD --target glad --config Debug
+cd Dependencies
+mkdir TMXLite
+cd ..
+cmake -DTMXLITE_STATIC_LIB=ON -S Submodules/TMXLite/tmxlite -B Dependencies/TMXLite
+cmake --build Dependencies/TMXLite --target tmxlite --config Debug
