@@ -13,33 +13,26 @@
 
 #include <chrono>
 
-namespace
-{
-	const float timePerFrame = 1.f / 60.f;
-}
-
 Game::Game(GLFWwindow* aWindow)
-	: myShaderProgramIdentifier(0)
-  , myGLFWWindow(aWindow) { }
+	: m_projectionMatrix(0.0f)
+	, myGLFWWindow(aWindow)
+	, myShaderProgramIdentifier(0)
+{}
 
 Game::~Game()
 {
 	if (myShaderProgramIdentifier)
-	{
 		glDeleteProgram(myShaderProgramIdentifier);
-	}
-	for (const auto& t : m_tileTextures)
-	{
-		glDeleteTextures(1, &t);
-	}
+
+	for (const auto& textureIdentifier : myTileTextureIdentifiers)
+		glDeleteTextures(1, &textureIdentifier);
 }
 
-//public
-void Game::run()
+void Game::Run()
 {
 	printf("Current working directory: %s\n", std::filesystem::current_path().string().c_str());
 
-	loadMap();
+	LoadMap();
 
 	auto previousTime = std::chrono::high_resolution_clock::now();
 	while (!glfwWindowShouldClose(myGLFWWindow))
@@ -49,33 +42,27 @@ void Game::run()
 		const float deltaTime = std::chrono::duration<float>(elapsedTime).count();
 		previousTime = currentTime;
 
-		doEvents();
-		update(deltaTime);
-		draw();
+		HandleEvents();
+		Update(deltaTime);
+		Draw();
 	}
 }
 
-//private
-void Game::doEvents() { }
-
-void Game::update(float dt) {}
-
-void Game::draw()
+void Game::Draw() const
 {
 	glClear(GL_COLOR_BUFFER_BIT);
 	glUseProgram(myShaderProgramIdentifier);
 
-	for (const auto& layer : m_mapLayers)
+	for (const auto& layer : myMapLayers)
 	{
-		layer->draw();
+		layer->Draw();
 	}
 
 	glfwSwapBuffers(myGLFWWindow);
 	glfwPollEvents();
 }
 
-
-void Game::loadMap()
+void Game::LoadMap()
 {
 	const std::string filePath = "Data/demo.tmx";
 	if (!FileUtility::Exists(filePath.c_str()))
@@ -84,26 +71,25 @@ void Game::loadMap()
 	tmx::Map map;
 	map.load(filePath);
 
-	//create shared resources, shader and tileset textures
-	initGLStuff(map);
+	// Create shared resources, shader and tileset textures
+	InitializeGL(map);
 
-	//create a drawable object for each tile layer
+	// Create a drawable object for each tile layer
 	const auto& layers = map.getLayers();
 	for (auto i = 0u; i < layers.size(); ++i)
 	{
 		if (layers[i]->getType() == tmx::Layer::Type::Tile)
 		{
-			m_mapLayers.emplace_back(std::make_unique<MapLayer>(map, i, m_tileTextures));
+			myMapLayers.emplace_back(std::make_unique<MapLayer>(map, i, myTileTextureIdentifiers));
 		}
 	}
 }
 
-
-void Game::initGLStuff(const tmx::Map& map)
+void Game::InitializeGL(const tmx::Map& aMap)
 {
 	m_projectionMatrix = glm::ortho(0.f, 800.f, 600.f, 0.f, -0.1f, 100.f);
 
-	loadShader();
+	LoadShader();
 	glUseProgram(myShaderProgramIdentifier);
 	glUniformMatrix4fv(glGetUniformLocation(myShaderProgramIdentifier, "u_projectionMatrix"), 1, GL_FALSE, &m_projectionMatrix[0][0]);
 
@@ -112,10 +98,10 @@ void Game::initGLStuff(const tmx::Map& map)
 	glUniform1i(glGetUniformLocation(myShaderProgramIdentifier, "u_tileMap"), 0);
 	glUniform1i(glGetUniformLocation(myShaderProgramIdentifier, "u_lookupMap"), 1);
 
-	const auto& tilesets = map.getTilesets();
+	const auto& tilesets = aMap.getTilesets();
 	for (const auto& ts : tilesets)
 	{
-		loadTexture(ts.getImagePath());
+		LoadTexture(ts.getImagePath());
 	}
 
 	glClearColor(0.6f, 0.8f, 0.92f, 1.f);
@@ -124,7 +110,7 @@ void Game::initGLStuff(const tmx::Map& map)
 	glBlendEquation(GL_FUNC_ADD);
 }
 
-void Game::loadShader()
+void Game::LoadShader()
 {
 	myShaderProgramIdentifier = glCreateProgram();
 	Shader vertexShader;
@@ -143,18 +129,18 @@ void Game::loadShader()
 	glBindAttribLocation(myShaderProgramIdentifier, 1, "a_texCoord");
 }
 
-void Game::loadTexture(const std::string& path)
+void Game::LoadTexture(const std::string& aFilepath)
 {
-	m_tileTextures.emplace_back(0);
-	unsigned& textureIdentifier = m_tileTextures.back();
+	myTileTextureIdentifiers.emplace_back(0);
+	unsigned& textureIdentifier = myTileTextureIdentifiers.back();
 
 	int width = 0;
 	int height = 0;
 	int numberOfChannels = 0;
-	unsigned char* data = stbi_load(path.c_str(), &width, &height, &numberOfChannels, 4);
+	unsigned char* data = stbi_load(aFilepath.c_str(), &width, &height, &numberOfChannels, 4);
 	if (!data)
 	{
-		printf("Failed to load %s\n", path.c_str());
+		printf("Failed to load %s\n", aFilepath.c_str());
 		return;
 	}
 

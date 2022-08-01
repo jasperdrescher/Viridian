@@ -1,8 +1,8 @@
 #pragma once
 
-#include <glm/matrix.hpp>
-
 #include "MapLayer.hpp"
+
+#include <glm/matrix.hpp>
 
 #include <memory>
 #include <string>
@@ -15,26 +15,21 @@ class Game final
 public:
 	Game(GLFWwindow* aWindow);
 	~Game();
-	
-	void run();
-	
-private:
 
-	void doEvents();
-	void update(float);
-	void draw();
-	
-	std::vector<std::unique_ptr<MapLayer>> m_mapLayers;
-	void loadMap();
-	
+	void Run();
+
+private:
+	void HandleEvents() {}
+	void Update(float aDeltaTime) {}
+	void Draw() const;
+	void LoadMap();
+	void InitializeGL(const tmx::Map&);
+	void LoadShader();
+	void LoadTexture(const std::string&);
+
+	std::vector<std::unique_ptr<MapLayer>> myMapLayers;
+	std::vector<unsigned> myTileTextureIdentifiers;
 	glm::mat4 m_projectionMatrix;
-	
-	unsigned myShaderProgramIdentifier;
-	std::vector<unsigned> m_tileTextures;
-	void initGLStuff(const tmx::Map&);
-	void loadShader();
-	void loadTexture(const std::string&);
-
-private:
 	GLFWwindow* myGLFWWindow;
+	unsigned myShaderProgramIdentifier;
 };

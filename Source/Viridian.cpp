@@ -62,7 +62,7 @@ int main(int /*argc*/, char** /*argv*/)
 	glDebugMessageCallback(GLDebugUtility::ErrorCallback, nullptr);
 
 	Game game(window);
-	game.run();
+	game.Run();
 
 	glfwTerminate();
 

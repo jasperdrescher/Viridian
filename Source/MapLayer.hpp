@@ -1,34 +1,32 @@
 #pragma once
 
-#include <vector>
+#include <tmxlite/Map.hpp>
 
-namespace tmx
-{
-    class Map;
-}
+#include <vector>
 
 class MapLayer final
 {
 public:
-    MapLayer(const tmx::Map&, std::size_t, const std::vector<unsigned>&);
-    ~MapLayer();
-    
-    MapLayer(const MapLayer&) = delete;
-    MapLayer& operator = (const MapLayer&) = delete;
+	MapLayer(const tmx::Map&, std::size_t, const std::vector<unsigned>&);
+	~MapLayer();
 
-    void draw();
+	MapLayer(const MapLayer&) = delete;
+	MapLayer& operator =(const MapLayer&) = delete;
+
+	void Draw() const;
 
 private:
+	struct Subset
+	{
+		Subset();
 
-    const std::vector<unsigned>& m_tilesetTextures;
+		unsigned myVertexBufferObject;
+		unsigned myTextureIdentifier;
+		unsigned myLookup;
+	};
 
-    struct Subset final
-    {
-        unsigned vbo = 0;
-        unsigned texture = 0;
-        unsigned lookup = 0;
-    };
-    std::vector<Subset> m_subsets;
+	void CreateSubsets(const tmx::Map& aMap, std::size_t aLayerIndex);
 
-    void createSubsets(const tmx::Map&, std::size_t);
+	std::vector<Subset> mySubsets;
+	const std::vector<unsigned>& myTilesetTextureIdentifiers;
 };
