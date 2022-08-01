@@ -10,6 +10,3 @@
 [submodule "Submodules/GLM"]
 	path = Submodules/GLM
 	url = https://github.com/g-truc/glm.git
-[submodule "Submodules/TMXLite"]
-	path = Submodules/TMXLite
-	url = https://github.com/fallahn/tmxlite.git
