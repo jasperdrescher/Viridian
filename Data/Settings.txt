@@ -1,1 +1,0 @@
-Data/test-maps/simple_map.json

@@ -1,23 +1,14 @@
-#version 460 core
+#version 460
 
-layout(location = 0) in vec2 in_position;
-layout(location = 1) in vec2 in_uv;
-layout(location = 2) in vec4 in_color;
+in vec3 a_position;
+in vec2 a_texCoord;
 
-// uniform will contain the world matrix.
-uniform mat3 screenTransform;
+uniform mat4 u_projectionMatrix;
 
-// output variables
-out vec2 uv;
-out vec4 color;
+out vec2 v_texCoord;
 
-void main(void)
+void main()
 {
-	//transform the vector
-	vec3 transformed = screenTransform * vec3(in_position, 1);
-	gl_Position = vec4(transformed, 1);
-
-	// pass through uv and color
-	uv = in_uv;
-	color = in_color;
+	gl_Position = u_projectionMatrix * vec4(a_position, 1.0);
+	v_texCoord = a_texCoord;
 }
