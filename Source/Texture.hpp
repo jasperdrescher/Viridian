@@ -5,7 +5,7 @@
 class Texture
 {
 public:
-    Texture();
+    Texture(unsigned& aTextureIdentifier);
     ~Texture();
 
     void LoadTexture(const std::string& aFilepath);
@@ -14,6 +14,6 @@ public:
     [[nodiscard]] unsigned int GetTextureIdentifier() const;
 
 private:
-    unsigned int myTextureIdentifier;
+    unsigned& myTextureIdentifier;
     unsigned int myReferenceCount;
 };

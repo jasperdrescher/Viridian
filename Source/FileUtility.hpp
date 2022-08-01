@@ -7,13 +7,21 @@
 
 namespace FileUtility
 {
-	static std::string ReadFile(const char* aFilepath)
+	static bool Exists(const char* aFilepath)
 	{
 		if (!std::filesystem::exists(aFilepath))
 		{
-			printf("Failed to open %s\n", aFilepath);
-			return "";
+			printf("File does not exist: %s\n", aFilepath);
+			return false;
 		}
+
+		return true;
+	}
+
+	static std::string ReadFile(const char* aFilepath)
+	{
+		if (!Exists(aFilepath))
+			return "";
 
 		std::ifstream filestream(aFilepath, std::ifstream::in);
 		if (!filestream.is_open())
