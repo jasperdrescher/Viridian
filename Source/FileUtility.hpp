@@ -37,4 +37,4 @@ namespace FileUtility
 
 		return sourceStringStream.str();
 	}
-}
+} // namespace FileUtility

@@ -11,7 +11,7 @@ public:
 	~MapLayer();
 
 	MapLayer(const MapLayer&) = delete;
-	MapLayer& operator =(const MapLayer&) = delete;
+	MapLayer& operator=(const MapLayer&) = delete;
 
 	void Draw() const;
 
