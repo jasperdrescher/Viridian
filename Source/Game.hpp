@@ -13,9 +13,10 @@ struct GLFWwindow;
 class Game final
 {
 public:
-	Game(GLFWwindow* aWindow);
+	Game();
 	~Game();
 
+	void Initialize();
 	void Run();
 
 private:
@@ -26,6 +27,7 @@ private:
 	void InitializeGL(const tmx::Map& aMap);
 	void LoadShader();
 	void LoadTexture(const std::string& aFilepath);
+	void PrintDebugInfo();
 
 	std::vector<std::unique_ptr<MapLayer>> myMapLayers;
 	std::vector<unsigned int> myTileTextureIdentifiers;
