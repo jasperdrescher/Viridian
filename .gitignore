@@ -2,6 +2,7 @@
 [Gg]enerated/
 [Bb]inaries/
 [Oo]ut/
+CPTCMakeBuild/
 
 CMakeSettings.json
 
