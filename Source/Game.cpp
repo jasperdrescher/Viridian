@@ -2,6 +2,9 @@
 #include "FileUtility.hpp"
 #include "Shader.hpp"
 #include "GLDebugUtility.hpp"
+#include "GLFWDebugUtility.hpp"
+#include "InputManager.hpp"
+#include "Camera.hpp"
 
 #include <GLFW/glfw3.h>
 #include <chrono>
@@ -11,11 +14,19 @@
 #include <glm/gtc/type_ptr.hpp>
 #include <tmxlite/Map.hpp>
 
+namespace GameParameters
+{
+	static constexpr float ourCameraMovementSpeed = 500.0f;
+	static constexpr glm::vec3 ourHorizontalAxis = glm::vec3(1.0f, 0.0f, 0.0f);
+	static constexpr glm::vec3 ourVerticallAxis = glm::vec3(0.0f, 1.0f, 0.0f);
+}
+
 Game::Game()
-	: myProjectionMatrix(0.0f)
-	, myViewMatrix(0.0f)
-	, myModelMatrix(0.0f)
+	: myModelMatrix(0.0f)
+	, myModelViewProjectionMatrix(0.0f)
+	, myWindowSize(0.0f)
 	, myGLFWWindow(nullptr)
+	, myCamera(nullptr)
 	, myShaderProgramIdentifier(0)
 {}
 
@@ -32,7 +43,7 @@ Game::~Game()
 
 void Game::Initialize()
 {
-	glfwSetErrorCallback(GLDebugUtility::ErrorCallback);
+	glfwSetErrorCallback(GLFWDebugUtility::ErrorCallback);
 
 	if (!glfwInit())
 	{
@@ -48,7 +59,9 @@ void Game::Initialize()
 	glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, GL_TRUE);
 	glfwWindowHint(GLFW_SAMPLES, 4);
 
-	myGLFWWindow = glfwCreateWindow(800, 600, "Viridian Debug x64", nullptr, nullptr);
+	myWindowSize = glm::vec2(800.0f, 600.0f);
+
+	myGLFWWindow = glfwCreateWindow(static_cast<int>(myWindowSize.x), static_cast<int>(myWindowSize.y), "Viridian Debug x64", nullptr, nullptr);
 	if (!myGLFWWindow)
 	{
 		glfwTerminate();
@@ -57,6 +70,9 @@ void Game::Initialize()
 	}
 
 	glfwMakeContextCurrent(myGLFWWindow);
+	glfwSetWindowUserPointer(myGLFWWindow, this);
+	glfwSetKeyCallback(myGLFWWindow, KeyCallback);
+	glfwSetInputMode(myGLFWWindow, GLFW_STICKY_KEYS, GL_TRUE);
 
 	if (!gladLoadGLLoader(reinterpret_cast<GLADloadproc>(glfwGetProcAddress)))
 	{
@@ -71,6 +87,8 @@ void Game::Initialize()
 	glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
 	glDebugMessageControl(GL_DEBUG_SOURCE_API, GL_DONT_CARE, GL_DONT_CARE, 0, nullptr, GL_FALSE);
 	glDebugMessageCallback(GLDebugUtility::ErrorCallback, nullptr);
+
+	myCamera = new Camera(myWindowSize);
 }
 
 void Game::Run()
@@ -87,16 +105,47 @@ void Game::Run()
 		const float deltaTime = std::chrono::duration<float>(elapsedTime).count();
 		previousTime = currentTime;
 
-		HandleEvents();
 		Update(deltaTime);
 		Draw();
 	}
+}
+
+void Game::Update(const float aDeltaTime)
+{
+	if (InputManager::GetInstance().GetIsKeyDown(Key::Left))
+	{
+		myCamera->SetPosition(myCamera->GetPosition() - (GameParameters::ourHorizontalAxis * aDeltaTime * GameParameters::ourCameraMovementSpeed));
+	}
+
+	if (InputManager::GetInstance().GetIsKeyDown(Key::Right))
+	{
+		myCamera->SetPosition(myCamera->GetPosition() + (GameParameters::ourHorizontalAxis * aDeltaTime * GameParameters::ourCameraMovementSpeed));
+	}
+
+	if (InputManager::GetInstance().GetIsKeyDown(Key::Up))
+	{
+		myCamera->SetPosition(myCamera->GetPosition() - (GameParameters::ourVerticallAxis * aDeltaTime * GameParameters::ourCameraMovementSpeed));
+	}
+
+	if (InputManager::GetInstance().GetIsKeyDown(Key::Down))
+	{
+		myCamera->SetPosition(myCamera->GetPosition() + (GameParameters::ourVerticallAxis * aDeltaTime * GameParameters::ourCameraMovementSpeed));
+	}
+
+	if (InputManager::GetInstance().GetIsKeyDown(Key::Escape))
+	{
+		glfwSetWindowShouldClose(myGLFWWindow, true);
+	}
+
+	myModelViewProjectionMatrix = myCamera->GetProjectionMatrix() * myCamera->GetViewMatrix() * myModelMatrix;
 }
 
 void Game::Draw() const
 {
 	glClear(GL_COLOR_BUFFER_BIT);
 	glUseProgram(myShaderProgramIdentifier);
+
+	glUniformMatrix4fv(glGetUniformLocation(myShaderProgramIdentifier, "u_MVP"), 1, GL_FALSE, glm::value_ptr(myModelViewProjectionMatrix));
 
 	for (const std::unique_ptr<MapLayer>& layer : myMapLayers)
 		layer->Draw();
@@ -126,16 +175,10 @@ void Game::LoadMap()
 
 void Game::InitializeGL(const tmx::Map& aMap)
 {
-	myProjectionMatrix = glm::ortho(0.0f, 800.0f, 600.0f, 0.0f, -0.1f, 100.0f);
-	constexpr glm::vec3 cameraPosition = glm::vec3(200.0f, 2000.0f, 0.0f);
-	constexpr glm::vec3 cameraFront = glm::vec3(0.0f, 0.0f, -1.0f);
-	myViewMatrix = glm::lookAt(cameraPosition, cameraPosition + cameraFront, glm::vec3(0.0f, 1.0f, 0.0f));
 	myModelMatrix = glm::mat4(1.0f);
 
 	LoadShader();
 	glUseProgram(myShaderProgramIdentifier);
-	glm::mat4x4 mvp = myProjectionMatrix * myViewMatrix * myModelMatrix;
-	glUniformMatrix4fv(glGetUniformLocation(myShaderProgramIdentifier, "u_MVP"), 1, GL_FALSE, glm::value_ptr(mvp));
 
 	// We'll make sure the current tile texture is active in 0,
 	// and lookup texture is active in 1 in MapLayer::draw()
@@ -201,6 +244,11 @@ void Game::LoadTexture(const std::string& aFilepath)
 	glBindTexture(GL_TEXTURE_2D, 0);
 
 	stbi_image_free(data);
+}
+
+void Game::KeyCallback(GLFWwindow* aWindow, int aKey, int aScancode, int anAction, int aMode)
+{
+	InputManager::GetInstance().OnKeyAction(aKey, aScancode, anAction != GLFW_RELEASE, aMode);
 }
 
 void Game::PrintDebugInfo()

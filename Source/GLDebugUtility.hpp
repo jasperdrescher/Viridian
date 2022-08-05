@@ -52,9 +52,4 @@ namespace GLDebugUtility
 		printf("Message from OpenGL: Severity: %s Type: %s Source: %s Id: 0x%x\n", severity.c_str(), type.c_str(), source.c_str(), anID);
 		printf("%s\n", aMessage);
 	}
-
-	static void ErrorCallback(int anError, const char* aDescription)
-	{
-		printf("%i %s", anError, aDescription);
-	}
 } // namespace GLDebugUtility

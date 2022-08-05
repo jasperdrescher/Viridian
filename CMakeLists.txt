@@ -14,7 +14,7 @@ set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/Libraries)
 set(SUBMODULES_DIR "${CMAKE_CURRENT_SOURCE_DIR}/Submodules")
 set(DEPENDENCIES_DIR "${CMAKE_CURRENT_SOURCE_DIR}/Dependencies")
 
-add_executable(Game "Source/Viridian.cpp" "Source/FileUtility.hpp" "Source/GLDebugUtility.hpp" "Source/Shader.cpp" "Source/Shader.hpp" "Source/MapLayer.hpp" "Source/MapLayer.cpp" "Source/Game.cpp" "Source/Game.hpp")
+add_executable(Game "Source/Viridian.cpp" "Source/FileUtility.hpp" "Source/GLDebugUtility.hpp" "Source/Shader.cpp" "Source/Shader.hpp" "Source/MapLayer.hpp" "Source/MapLayer.cpp" "Source/Game.cpp" "Source/Game.hpp" "Source/InputManager.hpp" "Source/InputManager.cpp" "Source/GLFWDebugUtility.hpp" "Source/Camera.cpp" "Source/Camera.hpp")
 
 set_property(TARGET Game PROPERTY VS_DEBUGGER_WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/Binaries")
 
