@@ -3,9 +3,9 @@
  <properties>
   <property name="test map property" type="float" value="12.43"/>
  </properties>
- <tileset firstgid="1" source="images/tilemap/platform.tsx"/>
+ <tileset firstgid="1" source="Tilesets/platform.tsx"/>
  <tileset firstgid="43" name="tileset02" tilewidth="32" tileheight="32" tilecount="24" columns="6">
-  <image source="images/tilemap/tileset02.png" width="192" height="128"/>
+  <image source="Tilesets/tileset02.png" width="192" height="128"/>
  </tileset>
  <layer id="1" name="Far" width="200" height="40">
   <data encoding="base64" compression="zlib">
@@ -86,7 +86,7 @@
   </object>
  </objectgroup>
  <imagelayer id="5" name="Test Image Layer" offsetx="4224" offsety="1536">
-  <image source="../images/mask_test.png"/>
+  <image source="Tilesets/mask_test.png"/>
   <properties>
    <property name="image layer property" value="buns"/>
   </properties>

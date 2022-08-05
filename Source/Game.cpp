@@ -156,7 +156,7 @@ void Game::Draw() const
 
 void Game::LoadMap()
 {
-	const std::string filePath = "Data/platform.tmx";
+	const std::string filePath = FileUtility::ReadFile("Data/Settings.txt");
 	if (!FileUtility::Exists(filePath.c_str()))
 		return;
 
@@ -200,8 +200,8 @@ void Game::LoadShader()
 	myShaderProgramIdentifier = glCreateProgram();
 	Shader vertexShader;
 	Shader fragmentShader;
-	const std::string vertexShaderData = FileUtility::ReadFile("Data/VertexShader.glsl");
-	const std::string fragmentShaderData = FileUtility::ReadFile("Data/FragmentShader.glsl");
+	const std::string vertexShaderData = FileUtility::ReadFile("Data/Shaders/VertexShader.glsl");
+	const std::string fragmentShaderData = FileUtility::ReadFile("Data/Shaders/FragmentShader.glsl");
 	vertexShader.AttachShader(myShaderProgramIdentifier, GL_VERTEX_SHADER, vertexShaderData.c_str());
 	fragmentShader.AttachShader(myShaderProgramIdentifier, GL_FRAGMENT_SHADER, fragmentShaderData.c_str());
 
