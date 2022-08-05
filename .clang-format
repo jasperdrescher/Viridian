@@ -27,8 +27,9 @@ BraceWrapping:
   BeforeLambdaBody: true
   BeforeWhile: true
 BreakBeforeBraces: Allman
+BreakConstructorInitializers: BeforeComma
 ColumnLimit: 140
-ConstructorInitializerAllOnOneLineOrOnePerLine: false
+ConstructorInitializerAllOnOneLineOrOnePerLine: true
 ConstructorInitializerIndentWidth : 4
 ContinuationIndentWidth: 4
 Cpp11BracedListStyle: false
@@ -39,6 +40,7 @@ NamespaceIndentation: All
 SpaceAfterTemplateKeyword: false
 SpaceBeforeCaseColon: true
 SpaceBeforeCpp11BracedList: true
+SpaceBeforeCtorInitializerColon: true
 SpacesBeforeTrailingComments: 1
 SpacesInContainerLiterals: false
 TabWidth: 4
