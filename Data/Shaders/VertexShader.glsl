@@ -1,14 +1,14 @@
 #version 460
 
-in vec3 a_position;
-in vec2 a_texCoord;
+in vec3 aPosition;
+in vec2 aTextureCoordinates;
 
-uniform mat4 u_MVP;
+uniform mat4 uModelViewProjection;
 
-out vec2 v_texCoord;
+out vec2 vTextureCoordinates;
 
 void main()
 {
-	gl_Position = u_MVP * vec4(a_position, 1.0);
-	v_texCoord = a_texCoord;
+	gl_Position = uModelViewProjection * vec4(aPosition, 1.0);
+	vTextureCoordinates = aTextureCoordinates;
 }

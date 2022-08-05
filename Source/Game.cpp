@@ -145,7 +145,7 @@ void Game::Draw() const
 	glClear(GL_COLOR_BUFFER_BIT);
 	glUseProgram(myShaderProgramIdentifier);
 
-	glUniformMatrix4fv(glGetUniformLocation(myShaderProgramIdentifier, "u_MVP"), 1, GL_FALSE, glm::value_ptr(myModelViewProjectionMatrix));
+	glUniformMatrix4fv(glGetUniformLocation(myShaderProgramIdentifier, "uModelViewProjection"), 1, GL_FALSE, glm::value_ptr(myModelViewProjectionMatrix));
 
 	for (const std::unique_ptr<MapLayer>& layer : myMapLayers)
 		layer->Draw();
@@ -182,8 +182,8 @@ void Game::InitializeGL(const tmx::Map& aMap)
 
 	// We'll make sure the current tile texture is active in 0,
 	// and lookup texture is active in 1 in MapLayer::draw()
-	glUniform1i(glGetUniformLocation(myShaderProgramIdentifier, "u_tileMap"), 0);
-	glUniform1i(glGetUniformLocation(myShaderProgramIdentifier, "u_lookupMap"), 1);
+	glUniform1i(glGetUniformLocation(myShaderProgramIdentifier, "uTileMap"), 0);
+	glUniform1i(glGetUniformLocation(myShaderProgramIdentifier, "uLookupMap"), 1);
 
 	const std::vector<tmx::Tileset>& tilesets = aMap.getTilesets();
 	for (const tmx::Tileset& tileset : tilesets)
