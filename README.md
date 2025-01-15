@@ -1,5 +1,6 @@
 # Viridian
  A 2D tilemap renderer using OpenGL and C++17.
+ Please use the arrow keys to move the camera.
  
 # Compiling
 It's currently only possible to easily compile for Windows 64-bit. If you're on Linux or MacOS you'll have to do the setup manually using CMake.
